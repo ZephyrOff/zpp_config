@@ -1,25 +1,25 @@
-# 🔧 Présentation
+# Présentation
 
 Ce module fournit un système complet de **gestion de fichiers de configuration** permettant :
 
-✅ YAML / JSON / TOML  
-✅ Templates Jinja2 (avec variables, `env()`, `vault()`, `vault_encryption()`)  
-✅ Chargement lazy ✅ Auto-save ✅ Export  
-✅ Validation via schéma hiérarchique et règles globales  
-✅ Accès dynamique par attributs _ou_ indexés (`cfg.db.host`)  
-✅ Merge / Update sans écrasement  
-✅ Auto-reload du fichier via **watchdog**  
-✅ Compatibilité Vault (clé protégée et décryptage)
+- YAML / JSON / TOML  
+- Templates Jinja2 (avec variables, `env()`, `vault()`, `vault_encryption()`)  
+- Chargement lazy - Auto-save - Export  
+- Validation via schéma hiérarchique et règles globales  
+- Accès dynamique par attributs _ou_ indexés (`cfg.db.host`)  
+- Merge / Update sans écrasement  
+- Auto-reload du fichier via **watchdog**  
+- Compatibilité Vault (clé protégée et décryptage)
 
-# 📦 Installation
+# Installation
 
 ```console
 [user@host ~]# pip install zpp_config
 ```
 
-# 🧰 Utilisation
+# Utilisation
 
-### 🧩 Initialisation
+### Initialisation
 
 ```python
 from zpp_config import Config
@@ -58,7 +58,7 @@ config.set_context({"env": "staging", "debug": True})
 config.reload()   # re-rend le template avec le nouveau contexte
 ```
 
-### 📥 Chargement du fichier
+### Chargement du fichier
 
 Il est possible de forcer le chargement du fichier avec la méthode **load**
 
@@ -91,32 +91,32 @@ On est également désactiver l'auto-reload avec:
 config.stop_autoreload()
 ```
 
-### 🔍 Accès aux valeurs
+### Accès aux valeurs
 
-#### ✅ Par attributs
+#### Par attributs
 ```python
 db_host = config.db.host
 ```
-#### ✅ Par index
+#### Par index
 ```python
 db_host = config["db.host"]
 ```
-#### ✅ Par get()
+#### Par get()
 ```python
 db_host = config.get("db.host", default="127.0.0.1")
 ```
-#### ✅ Itération
+#### Itération
 ```python
 for key, sub in config.db.items():
    print(key, sub.to_dict())
 ```
 
-#### ✅ Vérifier l’existence d’un chemin
+#### Vérifier l’existence d’un chemin
 ```python
 "db.host" in config   # True / False
 ```
 
-### ✏️ Modification des valeurs
+### Modification des valeurs
 
 ```python
 config.db.user = "admin"
@@ -127,7 +127,7 @@ config.delete("db.password")
 
 Toutes les modifications sont gardées en mémoire tant qu’on ne sauvegarde pas.
 
-### ✏️ Suppression des valeurs
+### Suppression des valeurs
 
 ```python
 config.delete("db.password")
@@ -135,7 +135,7 @@ del config["db.password"]
 del config.db.password
 ```
 
-### 💾 Sauvegarde
+### Sauvegarde
 
 #### Sauvegarde manuelle
 
@@ -157,7 +157,7 @@ config.auto_save(True)
 ```
 
 
-### 🔄 Merge / Update
+### Merge / Update
 
 Fusionne un dictionnaire **dans le node courant** :
 ```python
@@ -173,7 +173,7 @@ config.update("db", {"user": "root"})
 - `overload=False` → ne remplace pas les valeurs existantes
 - `overload=True` → écrase celles existantes
 
-### 🔐 Vault et données chiffrées
+### Vault et données chiffrées
 
 Le render Jinja fournis 2 méthodes pour récupérer des données chiffrées depuis un fichier vault ou un string vault_encryption
 
@@ -193,7 +193,7 @@ api_key: "{{ vault_encryption('encrypted_api_key') }}"
 
 Lors de l'initialisation de la config, il faudra forcément **vault_encryption_keyfile** ou **vault_encryption_password**
 
-### 🧠 Méthode complémentaire Jinja
+### Méthode complémentaire Jinja
 
 #### Méthode env
 
@@ -265,7 +265,7 @@ Utilisation :
 generated_at: "{{ now() }}"
 ```
 
-### ✅ Validation de la configuration
+### Validation de la configuration
 
 #### Validation via schéma hiérarchique
 
@@ -307,7 +307,8 @@ errors = config.validate(rules=rules, strict=False)
 |`_regex`|Chaînes|Validation Regex|
 |`_enum`|Tout|Liste de valeurs autorisées|
 |`_not`|Tout|Valeur interdite|
-### 📤 Export
+
+### Export
 
 ```python
 config.export("output.yaml", type="yaml")

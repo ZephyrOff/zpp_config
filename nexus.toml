@@ -40,7 +40,7 @@ toml = "N.A"
 
 [project.build]
 packages = ["re", "ast", "os", "watchdog", "pyyaml", "jinja2", "impmagic", "zpp_args", "zpp_store", "zpp_color", "Crypto", "pycryptodome", "Cryptography", "toml"]
-includes = ["config"]
+includes = ["core", "backend"]
 excludes = []
 include_files = []
 optimize = 0
