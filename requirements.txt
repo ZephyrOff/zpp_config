@@ -8,3 +8,4 @@ zpp_color
 Crypto
 pycryptodome
 Cryptography
+toml
