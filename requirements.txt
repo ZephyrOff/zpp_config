@@ -1,0 +1,10 @@
+watchdog
+pyyaml
+jinja2
+impmagic
+zpp_args
+zpp_store
+zpp_color
+Crypto
+pycryptodome
+Cryptography

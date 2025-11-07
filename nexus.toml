@@ -1,6 +1,6 @@
 [project]
 name = "zpp_config"
-version = "1.2.5"
+version = "2.0.0"
 description = "Module pour le chargement et la modification de fichier de configuration"
 mainfile = "__init__.py"
 requires-python = ">=3.6"
@@ -22,13 +22,23 @@ homepage = "https://github.com/ZephyrOff/zpp_config"
 documentation = "https://github.com/ZephyrOff/zpp_config"
 
 [project.dependencies]
+watchdog = "N.A"
+pyyaml = "N.A"
+jinja2 = "N.A"
+impmagic = "N.A"
+zpp_args = "N.A"
+zpp_store = "N.A"
+zpp_color = "N.A"
+Crypto = "N.A"
+pycryptodome = "N.A"
+Cryptography = "N.A"
 
 [project.dependencies.windows]
 
 [project.dependencies.linux]
 
 [project.build]
-packages = ["re", "ast", "os"]
+packages = ["re", "ast", "os", "watchdog", "pyyaml", "jinja2", "impmagic", "zpp_args", "zpp_store", "zpp_color", "Crypto", "pycryptodome", "Cryptography"]
 includes = ["config"]
 excludes = []
 include_files = []
@@ -41,4 +51,4 @@ icon = ""
 platforms = "ALL"
 
 [project.wheel.entry_points]
-console_scripts = []
+console_scripts = ['zpp_config = zpp_config:cli']
