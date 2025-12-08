@@ -1,6 +1,6 @@
 [project]
 name = "zpp_config"
-version = "2.0.0"
+version = "2.1.0"
 description = "Module pour le chargement et la modification de fichier de configuration"
 mainfile = "__init__.py"
 requires-python = ">=3.6"

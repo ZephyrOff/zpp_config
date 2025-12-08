@@ -14,3 +14,7 @@
 
 ## [2.0.0] - 2025-11-07
 - Refonte complète du module
+
+## [2.1.0] - 2025-12-08
+- Add IniBackend
+- Correctif PEP 328
