@@ -18,3 +18,6 @@
 ## [2.1.0] - 2025-12-08
 - Add IniBackend
 - Correctif PEP 328
+
+## [2.2.0] - 2025-12-17
+- Ajout du backend cfg
