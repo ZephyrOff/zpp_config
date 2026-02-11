@@ -1,8 +1,32 @@
 import impmagic
+from jinja2 import FileSystemLoader
+from pathlib import Path
+import copy
 
 
 class ValidationError(Exception):
     pass
+
+
+class SafeFileSystemLoader(FileSystemLoader):
+    def get_source(self, environment, template):
+        try:
+            return super().get_source(environment, template)
+
+        except UnicodeDecodeError:
+            # Reconstruction du chemin réel
+            for searchpath in self.searchpath:
+                filename = Path(searchpath) / template
+                if filename.exists():
+                    break
+            else:
+                raise
+
+            # Fallback Windows
+            with open(filename, "r", encoding="cp1252") as f:
+                source = f.read()
+
+            return source, str(filename), lambda: False
 
 
 ## Méthode Jinja2
@@ -20,13 +44,15 @@ def get_vault_key(vault_file, key, vault_password=None, vault_keyfile=None):
     return v.get_key(key)
 ## Méthode Jinja2
 
-class ConfigNode:
+class ConfigNode(dict):
     """Gère uniquement la hiérarchie et l'accès aux données"""
 
     def __init__(self, config=None, path="", _data=None):
         self._config = config
         self._path = path
         self._data = _data
+
+        super().__init__(self._get_value() or {})
 
     def _root_data(self):
         """Retourne la référence au dictionnaire de données racine."""
@@ -89,7 +115,10 @@ class ConfigNode:
         val = self._get_value()
         if isinstance(val, dict):
             for k, v in val.items():
-                yield k, ConfigNode(self._config or self, f"{self._full_path(k)}")
+                if isinstance(v, dict):
+                    yield k, ConfigNode(self._config or self, self._full_path(k))
+                else:
+                    yield k, v
 
     def keys(self):
         # autoload
@@ -107,7 +136,7 @@ class ConfigNode:
             for k in val:
                 yield ConfigNode(self._config or self, f"{self._full_path(k)}")
 
-    def get(self, path, default=None, strict: bool = False):
+    def get(self, path, default=None, strict=False, dict_strict=False):
         # autoload
         object.__getattribute__(self, "_autoload")()
 
@@ -119,6 +148,11 @@ class ConfigNode:
                     raise KeyError(path)
                 return default
             node = node[k]
+        
+        if not dict_strict:
+            if isinstance(node, dict):
+                return ConfigNode(self._config or self, self._full_path(path))
+
         return node
 
     def set(self, path, value):
@@ -132,6 +166,8 @@ class ConfigNode:
                 node[k] = {}
             node = node[k]
         node[keys[-1]] = value
+
+        super().__setitem__(keys[-1], value)
 
         # Auto-save
         root_node = self._config if self._config else self
@@ -328,6 +364,18 @@ class ConfigNode:
         
         self.delete(path)
 
+    def __len__(self):
+        object.__getattribute__(self, "_autoload")()
+
+        val = self._get_value()
+        return len(val) if isinstance(val, dict) else 0
+
+    def copy(self):
+        object.__getattribute__(self, "_autoload")()
+
+        data = copy.deepcopy(self.to_dict())
+        return ConfigNode(config=None, path="", _data=data)
+
 
 class Config(ConfigNode):
     @impmagic.loader(
@@ -338,10 +386,10 @@ class Config(ConfigNode):
         {'module':'zpp_config.backend.ini', 'submodule': ['IniBackend']},
         {'module':'zpp_config.backend.cfg', 'submodule': ['CfgBackend']},
         {'module':'pathlib', 'submodule': ['Path']},
-        {'module':'jinja2', 'submodule': ['Environment', 'FileSystemLoader']},
+        {'module':'jinja2', 'submodule': ['Environment']},
         {'module':'zpp_config.core.vault_encryption', 'submodule': ['vault_decrypt']},
     )
-    def __init__(self, filename, filetype=None, context=None, vault_file=None, vault_keyfile=None, vault_password=None, vault_encryption_keyfile=None, vault_encryption_password=None):
+    def __init__(self, filename, filetype=None, context=None, vault_file=None, vault_keyfile=None, vault_password=None, vault_encryption_keyfile=None, vault_encryption_password=None, disable_jinja_render=False):
         self._filename = Path(filename)
         self._context = context or {}
 
@@ -358,9 +406,10 @@ class Config(ConfigNode):
 
         # Environment Jinja2 personnalisable
         self._env = Environment(
-            loader=FileSystemLoader(self._filename.parent),
+            loader=SafeFileSystemLoader(self._filename.parent),
             autoescape=False
         )
+        self._disable_jinja_render = disable_jinja_render
 
         # Fonction pour récupérer une clé dans un vault
         def vault(key):
@@ -418,18 +467,34 @@ class Config(ConfigNode):
         self._loaded = False
         super().__init__(path="", _data={})
 
+    def _read_source(self):
+        """
+        Read file content using the Jinja loader logic
+        (handles UTF-8 + Windows cp1252 fallback).
+        """
+        # On passe volontairement par le loader Jinja
+        source, _, _ = self._env.loader.get_source(
+            self._env, self._filename.name
+        )
+        return source
+
     def load(self):
         """Render Jinja + parse via backend"""
         if not self._filename.exists():
             self._data = {}
             self._loaded = True
+            return
 
+        raw = self._read_source()
+
+        if self._disable_jinja_render:
+            data = raw
         else:
-            template = self._env.get_template(self._filename.name)
-            data_render = template.render(**self._context)
+            template = self._env.from_string(raw)
+            data = template.render(**self._context)
 
-            self._data = self._backend.load_data(data_render)
-            self._loaded = True
+        self._data = self._backend.load_data(data)
+        self._loaded = True
 
     def reload(self):
         """Re-render si le context a changé"""

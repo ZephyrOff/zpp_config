@@ -1,6 +1,6 @@
 [project]
 name = "zpp_config"
-version = "2.2.0"
+version = "2.2.7"
 description = "Module pour le chargement et la modification de fichier de configuration"
 mainfile = "__init__.py"
 requires-python = ">=3.6"
@@ -33,13 +33,10 @@ Crypto = "N.A"
 pycryptodome = "N.A"
 Cryptography = "N.A"
 toml = "N.A"
-
-[project.dependencies.windows]
-
-[project.dependencies.linux]
+tomlkit = "N.A"
 
 [project.build]
-packages = ["re", "ast", "os", "watchdog", "pyyaml", "jinja2", "impmagic", "zpp_args", "zpp_store", "zpp_color", "Crypto", "pycryptodome", "Cryptography", "toml"]
+packages = ["re", "ast", "os", "watchdog", "pyyaml", "jinja2", "impmagic", "zpp_args", "zpp_store", "zpp_color", "Crypto", "pycryptodome", "Cryptography", "toml", "yaml", "tomlkit"]
 includes = ["core", "backend"]
 excludes = []
 include_files = []
@@ -52,4 +49,4 @@ icon = ""
 platforms = "ALL"
 
 [project.wheel.entry_points]
-console_scripts = ['zpp_config = zpp_config:cli']
+console_scripts = ["zpp_config = zpp_config:cli"]

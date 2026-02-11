@@ -32,11 +32,18 @@ Le backend est automatiquement choisi selon l’extension du fichier, mais il es
 Lors de l'initialisation, il est également possible de définir plusieurs paramètres qui seront utile pour le render Jinja.
 
 **context**:  défini un dictionnaire contenant les variables Jinja
+
 **vault_file**: emplacement du fichier vault
+
 **vault_keyfile**: emplacement du fichier contenant le mot de passe du vault
+
 **vault_password**: mot de passe du vault
+
 **vault_encryption_keyfile**: emplacement du fichier contenant le mot de passe du vault_encryption
+
 **vault_encryption_password**: mot de passe du vault_encryption
+
+**disable_jinja_render**: Désactive le render Jinja
 
 ```python
 from core.config import Config
@@ -105,6 +112,8 @@ db_host = config["db.host"]
 ```python
 db_host = config.get("db.host", default="127.0.0.1")
 ```
+Par défaut, la méthode get va renvoyer un ConfigNode, mais il est possible de forcer l'envoi d'un dict brut avec dict_strict=True
+
 #### Itération
 ```python
 for key, sub in config.db.items():
